@@ -1,6 +1,6 @@
 # sqli-incident-analyzer
 
-Pipeline de análise forense de logs de segurança com detecção automática de incidentes de SQL Injection.
+Análise de logs de segurança com detecção automática de incidentes de SQL Injection.
 
 Desenvolvido como solução de análise do incidente ocorrido na VendasOnline em 15/03/2026, o projeto localiza automaticamente a primeira anomalia e o pico do incidente a partir de logs brutos — sem valores hardcoded e sem intervenção manual.
 
