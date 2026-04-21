@@ -28,13 +28,10 @@ waf_logs  = pd.read_csv('waf_logs.csv')
 for df in [http_logs, db_logs, waf_logs]:
     df['timestamp'] = pd.to_datetime(df['timestamp'])
 
-# 2. Processamento de tendências
 tentativas = http_logs[http_logs['params'].str.contains('UNION|SELECT|--', na=False, case=False)].set_index('timestamp').resample('1min').size()
 sucessos_db = db_logs[(db_logs['source'] == 'unknown-src') & (db_logs['status'] == 'OK')].set_index('timestamp').resample('1min').size()
 
-# ── Detecção automática dos marcos temporais ─
 
-# --- PASSO 1: DETECÇÃO DO PRIMEIRO INCIDENTE (EXATO) ---
 # Localiza o primeiro minuto com atividade
 minuto_inicial = tentativas[tentativas > 0].index.min()
 fim_minuto_inicial = minuto_inicial + pd.Timedelta(minutes=1)
@@ -47,7 +44,7 @@ alertas_no_inicio = waf_logs[
 ]
 primeiro_incidente = alertas_no_inicio['timestamp'].min() if not alertas_no_inicio.empty else minuto_inicial
 
-# --- PASSO 2: DETECÇÃO DO PICO DO INCIDENTE ---
+
 # Critério: minuto com maior volume combinado de tentativas HTTP + queries maliciosas no banco
 combined       = tentativas.add(sucessos_db, fill_value=0)
 pico_incidente = combined.idxmax()
