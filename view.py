@@ -4,7 +4,7 @@ import matplotlib.dates as mdates
 import csv
 import os
 
-# 1. Carregamento Robusto
+
 def robust_parse(filename, expected_cols):
     rows = []
     if not os.path.exists(filename): return pd.DataFrame()
@@ -32,7 +32,7 @@ for df in [http_logs, db_logs, waf_logs]:
 tentativas = http_logs[http_logs['params'].str.contains('UNION|SELECT|--', na=False, case=False)].set_index('timestamp').resample('1min').size()
 sucessos_db = db_logs[(db_logs['source'] == 'unknown-src') & (db_logs['status'] == 'OK')].set_index('timestamp').resample('1min').size()
 
-# ── Detecção automática dos marcos temporais (SEM HARDCODE) ──────────────────
+# ── Detecção automática dos marcos temporais ─
 
 # --- PASSO 1: DETECÇÃO DO PRIMEIRO INCIDENTE (EXATO) ---
 # Localiza o primeiro minuto com atividade
@@ -52,13 +52,9 @@ primeiro_incidente = alertas_no_inicio['timestamp'].min() if not alertas_no_inic
 combined       = tentativas.add(sucessos_db, fill_value=0)
 pico_incidente = combined.idxmax()
 
-# ─────────────────────────────────────────────────────────────────────────────
-
-# 3. Visualização
 plt.figure(figsize=(16, 8))
 ax = plt.gca()
 
-# Linhas de Atividade
 plt.plot(tentativas.index, tentativas.values, label='Tentativas de Ataque (Rede)', color='black', marker='o', linewidth=2)
 plt.plot(sucessos_db.index, sucessos_db.values, label='Explorações com Sucesso (Impacto no Banco)', color='green', marker='o', linewidth=2)
 
@@ -69,7 +65,6 @@ plt.axvline(primeiro_incidente, color='green', linestyle=':', linewidth=2,
 plt.axvline(pico_incidente, color='red', linestyle='--', linewidth=2, 
             label=f'Pico do Incidente ({pico_incidente.strftime("%H:%M:%S")})')
 
-# Configurações do Eixo X
 ax.set_xlim([pd.Timestamp('2026-03-15 08:41:00'), sucessos_db.index.max() + pd.Timedelta(minutes=2)])
 ax.xaxis.set_major_locator(mdates.MinuteLocator(interval=1))
 ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
